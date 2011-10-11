@@ -26,29 +26,6 @@ App::import('Core', 'HttpSocket');
 class StripeSource extends DataSource {
 
 /**
- * Formats data for Stripe
- * 
- * Fields within a key will be moved into that key when sent to Stripe. Everything
- * else will remain in tact.
- * 
- * @var array
- */
-	public $formatFields = array(
-		'card' => array(
-			'number',
-			'exp_month',
-			'exp_year',
-			'cvc',
-			'name',
-			'address_line_1',
-			'address_1ine_2',
-			'address_zip',
-			'address_state',
-			'address_country'
-		)
-	);
-
-/**
  * HttpSocket
  * 
  * @var HttpSocket
@@ -85,7 +62,7 @@ class StripeSource extends DataSource {
 				'path' => $model->path
 			),
 			'method' => 'POST',
-			'body' => array_combine($fields, $values)
+			'body' => $this->reformat($model, array_combine($fields, $values))
 		);
 		$response = $this->request($request);
 		if ($response === false) {
@@ -117,7 +94,11 @@ class StripeSource extends DataSource {
 			return false;
 		}
 		$model->id = $response['id'];
-		return $response;
+		return array(
+			array(
+				$model->alias => $response
+			)
+		);
 	}
 
 /**
@@ -140,7 +121,7 @@ class StripeSource extends DataSource {
 				'path' => trim($model->path, '/').'/'.$id
 			),
 			'method' => 'POST',
-			'body' => $data
+			'body' => $this->reformat($model, $data)
 		);
 		
 		$response = $this->request($request);
@@ -148,7 +129,7 @@ class StripeSource extends DataSource {
 			return false;
 		}
 		$model->id = $id;
-		return $response;
+		return array($model->alias => $response);
 	}
 
 /**
@@ -197,10 +178,6 @@ class StripeSource extends DataSource {
 		$this->request = Set::merge($this->request, $request);
 		$this->request['uri']['path'] = '/v1/'.trim($this->request['uri']['path'], '/');
 		
-		if (isset($this->request['body'])) {
-			$this->request['body'] = $this->reformat($this->request['body']);
-		}
-		
 		try {
 			$response = $this->Http->request($this->request);
 			switch ($this->Http->response['status']['code']) {
@@ -231,9 +208,12 @@ class StripeSource extends DataSource {
  * @param array $data Data sent by Cake
  * @return array Stripe-formatted data
  */
-	public function reformat($data) {
+	public function reformat($model, $data) {
+		if (!isset($model->formatFields)) {
+			return $data;
+		}
 		foreach ($data as $field => $value) {
-			foreach ($this->formatFields as $key => $fields) {
+			foreach ($model->formatFields as $key => $fields) {
 				if (in_array($field, $fields)) {
 					$data[$key][$field] = $value;
 					unset($data[$field]);

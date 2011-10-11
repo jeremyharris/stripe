@@ -1,6 +1,6 @@
 <?php
 
-App::import('Model', 'Stripe.App');
+App::import('Model', array('Stripe.App', 'Stripe.StripeCustomer'));
 App::import('Core', 'HttpSocket');
 
 Mock::generatePartial('HttpSocket', 'MockHttpSocket', array('request'));
@@ -32,13 +32,15 @@ class TestStripeSource extends CakeTestCase {
 	}
 	
 	function testReformat() {
+		$model = new StripeCustomer();
+		
 		$data = array(
 			'number' => '234',
 			'name' => 'Jeremy',
 			'email' => 'jeremy@42pixels.com',
 			'address_line_1' => '123 Main'
 		);
-		$result = $this->Source->reformat($data);
+		$result = $this->Source->reformat($model, $data);
 		$expected = array(
 			'card' => array(
 				'number' => '234',
@@ -49,14 +51,14 @@ class TestStripeSource extends CakeTestCase {
 		);
 		$this->assertEqual($result, $expected);
 		
-		$this->Source->formatFields['user'] = array('email');
+		$model->formatFields['user'] = array('email');
 		$data = array(
 			'number' => '234',
 			'name' => 'Jeremy',
 			'email' => 'jeremy@42pixels.com',
 			'address_line_1' => '123 Main'
 		);
-		$result = $this->Source->reformat($data);
+		$result = $this->Source->reformat($model, $data);
 		$expected = array(
 			'card' => array(
 				'number' => '234',
@@ -135,9 +137,13 @@ class TestStripeSource extends CakeTestCase {
 		$this->Source->Http->setReturnValueAt(0, 'request', $this->Source->Http->response['body']);
 		$response = $this->Source->read($this->Model, array('conditions' => array('TestStripeModel.id' => '1234')));
 		$this->assertEqual($response, array(
-			'id' => '1234',
-			'object' => 'customer',
-			'description' => 'Jeremy Harris'
+			array(
+				'TestStripeModel' => array(
+					'id' => '1234',
+					'object' => 'customer',
+					'description' => 'Jeremy Harris'
+				)
+			)
 		));
 		$this->assertEqual($this->Model->id, 1234);
 		$this->assertEqual($this->Source->request['method'], 'GET');
