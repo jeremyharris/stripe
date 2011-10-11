@@ -12,7 +12,7 @@
  */
 
 /**
- * StripeApp
+ * StripeAppModel
  * 
  * @package stripe
 */
@@ -40,6 +40,16 @@ class StripeAppModel extends AppModel {
  */
 	public function exists() {
 		return true;
+	}
+	
+/**
+ * Returns the last error from Stripe
+ * 
+ * @return string Error
+ */
+	public function getStripeError() {
+		$ds = ConnectionManager::getDataSource($this->useDbConfig);
+		return $ds->lastError;
 	}
 	
 }
