@@ -94,7 +94,7 @@ class TestStripeSource extends CakeTestCase {
 			'status' => array(
 				'code' => '402',
 			),
-			'body' => '{"message" : "This is an error message"}'
+			'body' => '{"error":{ "message" : "This is an error message"}}'
 		);
 		$this->Source->Http->setReturnValueAt(1, 'request', $this->Source->Http->response['body']);
 		$response = $this->Source->request();

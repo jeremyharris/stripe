@@ -186,7 +186,7 @@ class StripeSource extends DataSource {
 				break;
 				case '402':
 					$error = json_decode($response, true);
-					$this->lastError = $error['message'];
+					$this->lastError = $error['error']['message'];
 					return false;
 				break;
 				default:
