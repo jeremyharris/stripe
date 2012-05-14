@@ -34,16 +34,6 @@ class StripeAppModel extends AppModel {
  */
 	public $useTable = false;
 
-
-/**
- * Unused function
- *
- * @return true
- */
-	public function exists() {
-		return true;
-	}
-
 /**
  * Returns the last error from Stripe
  *
