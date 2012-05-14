@@ -167,16 +167,13 @@ class StripeSource extends DataSource {
 			'uri' => array(
 				'host' => 'api.stripe.com',
 				'scheme' => 'https',
-				'path' => '/'
+				'path' => '/',
 			),
 			'method' => 'GET',
-			'auth' => array(
-				'user' => $this->config['api_key'],
-				'pass' => ''
-			)
 		);
 		$this->request = Set::merge($this->request, $request);
-		$this->request['uri']['path'] = '/v1/'.trim($this->request['uri']['path'], '/');
+		$this->request['uri']['path'] = '/v1/' . trim($this->request['uri']['path'], '/');
+		$this->Http->configAuth('Basic', $this->config['api_key'], '');
 
 		try {
 			$response = $this->Http->request($this->request);
@@ -223,18 +220,38 @@ class StripeSource extends DataSource {
 		return $data;
 	}
 
-
+/**
+ * For checking if record exists. Always say yes.
+ *
+ * @param Model $Model
+ * @param string $func
+ * @return true
+ */
+	public function calculate(Model $Model, $func) {
+		return 1;
+	}
 
 /**
- * Unused function
+ * Don't use internal caching
  *
- * @param Model $model
- * @param string $func
  * @return null
  */
-	public function calculate($model, $func) {
+	public function listSources() {
 		return null;
 	}
 
+/**
+ * Descibe with schema. Check the model or use nothing.
+ *
+ * @param Model $Model
+ * @return array
+ */
+	public function describe(Model $Model) {
+		if (isset($Model->_schema)) {
+			return $Model->_schema;
+		} else {
+			return null;
+		}
+	}
 
 }
