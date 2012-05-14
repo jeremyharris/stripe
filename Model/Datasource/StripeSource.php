@@ -81,6 +81,10 @@ class StripeSource extends DataSource {
  * @return mixed `false` on failure, data on success
  */
 	public function read($model, $queryData = array()) {
+		// If calculate() wants to know if the record exists. Say yes.
+		if ($queryData['fields'] == 'COUNT') {
+			return array(array(array('count' => 1)));
+		}
 		if (empty($queryData['conditions'][$model->alias.'.'.$model->primaryKey])) {
 			$queryData['conditions'][$model->alias.'.'.$model->primaryKey] = $model->id;
 		}
@@ -221,14 +225,14 @@ class StripeSource extends DataSource {
 	}
 
 /**
- * For checking if record exists. Always say yes.
+ * For checking if record exists. Return COUNT to have read() say yes.
  *
  * @param Model $Model
  * @param string $func
  * @return true
  */
 	public function calculate(Model $Model, $func) {
-		return 1;
+		return 'COUNT';
 	}
 
 /**
