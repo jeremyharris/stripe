@@ -135,5 +135,4 @@ class StripeCustomer extends StripeAppModel {
 		)
 	);
 
-
 }

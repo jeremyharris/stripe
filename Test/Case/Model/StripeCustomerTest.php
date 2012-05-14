@@ -51,57 +51,118 @@ class StripeCustomerTest extends CakeTestCase {
 	}
 
 /**
- * testFlow
+ * testCreate
  *
  * @return void
  */
-	public function testFlow() {
+	public function testCreate() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
 			'body' => json_encode(array(
 				'id' => '1234',
-				'active_card' => array(
-					'last4' => '4242',
-				)
 			))
 		);
-		$this->Source->Http->expects($this->any())
+		$this->Source->Http->expects($this->once())
 			->method('request')
+			->with(
+				$this->equalTo(array(
+					'uri' => array(
+						'host' => 'api.stripe.com',
+						'scheme' => 'https',
+						'path' => '/v1/customers/1234'
+					),
+					'method' => 'POST',
+					'body' => array(
+						'email' => 'jeremy@42pixels.com',
+						'description' => 'Jeremy Harris',
+						'card' => array(
+							'number' => '4242424242424242',
+							'exp_month' => '11',
+							'exp_year' => '2013',
+							'cvc' => '123',
+						),
+					),
+				))
+			)
 			->will($this->returnValue($this->Source->Http->response['body']));
-		// create a plan
 		$this->Model->create();
-		$expected = array(
+		$result = $this->Model->save(array(
 			'StripeCustomer' => array(
 				'id' => '1234',
+				'number' => '4242424242424242',
 				'exp_month' => '11',
 				'exp_year' => date('Y', strtotime('next year')),
 				'cvc' => '123',
 				'email' => 'jeremy@42pixels.com',
 				'description' => 'Jeremy Harris',
 			),
-		);
-		$result = $this->Model->save($expected);
-		$this->assertTrue(($result !== false));
-		$id = $this->Model->id;
-
-		// retrieve
-		$result = $this->Model->read();
-		$this->assertEqual($result['StripeCustomer']['id'], $id);
-		$this->assertEqual($result['StripeCustomer']['active_card']['last4'], '4242');
-
-		// update
-		$this->Model->id = $id;
-		$result = $this->Model->save(array(
-			'StripeCustomer' => array(
-				'description' => 'Not Jeremy Harris'
-			)
 		));
 		$this->assertTrue(($result !== false));
+	}
 
-		$results = $this->Model->read();
-		$this->assertEqual($result['StripeCustomer']['description'], 'Not Jeremy Harris');
+/**
+ * testUpdate
+ *
+ * @return void
+ */
+	public function testUpdate() {
+		$this->Source->Http->response = array(
+			'status' => array('code' => 200),
+			'body' => json_encode(array(
+				'id' => '1234',
+			))
+		);
+		$this->Source->Http->expects($this->once())
+			->method('request')
+			->with(
+				$this->equalTo(array(
+					'uri' => array(
+						'host' => 'api.stripe.com',
+						'scheme' => 'https',
+						'path' => '/v1/customers/1234'
+					),
+					'method' => 'POST',
+					'body' => array(
+						'description' => 'Not Jeremy Harris',
+					),
+				))
+			)
+			->will($this->returnValue($this->Source->Http->response['body']));
+		$this->Model->id = '1234';
+		$result = $this->Model->save(array(
+			'StripeCustomer' => array(
+				'description' => 'Not Jeremy Harris',
+			),
+		));
+		$this->assertTrue(($result !== false));
+	}
 
-		$this->assertTrue($this->Model->delete($id));
+/**
+ * testDelete
+ *
+ * @return void
+ */
+	public function testDelete() {
+		$this->Source->Http->response = array(
+			'status' => array('code' => 200),
+			'body' => json_encode(array(
+				'id' => '1234',
+			))
+		);
+		$this->Source->Http->expects($this->once())
+			->method('request')
+			->with(
+				$this->equalTo(array(
+					'uri' => array(
+						'host' => 'api.stripe.com',
+						'scheme' => 'https',
+						'path' => '/v1/customers/1234'
+					),
+					'method' => 'DELETE',
+				))
+			)
+			->will($this->returnValue($this->Source->Http->response['body']));
+		$this->Model->delete('1234');
 	}
 
 }

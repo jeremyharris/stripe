@@ -204,7 +204,10 @@ class StripeSourceTest extends CakeTestCase {
 		$this->Source->Http->expects($this->at(0))
 			->method('request')
 			->will($this->returnValue($this->Source->Http->response['body']));
-		$response = $this->Source->read($this->Model, array('conditions' => array('TestStripeModel.id' => '1234')));
+		$response = $this->Source->read($this->Model, array(
+			'conditions' => array('TestStripeModel.id' => '1234'),
+			'fields' => array(),
+		));
 		$this->assertEqual($response, array(
 			array(
 				'TestStripeModel' => array(
