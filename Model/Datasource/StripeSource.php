@@ -1,10 +1,10 @@
 <?php
 /**
  * Stripe datasource
- * 
+ *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
- * 
+ *
  * @copyright Copyright 2011, Jeremy Harris
  * @link http://42pixels.com
  * @package stripe
@@ -19,7 +19,7 @@ App::uses('HttpSocket', 'Network/Http');
 
 /**
  * StripSource
- * 
+ *
  * @package stripe
  * @subpackage stripe.models.datasources
  */
@@ -27,30 +27,30 @@ class StripeSource extends DataSource {
 
 /**
  * HttpSocket
- * 
+ *
  * @var HttpSocket
  */
 	public $Http = null;
-	
+
 /**
  * Constructor. Sets API key and throws an error if it's not defined in the
  * db config
- * 
- * @param array $config 
+ *
+ * @param array $config
  */
 	public function __construct($config = array()) {
 		parent::__construct($config);
-		
+
 		if (empty($config['api_key'])) {
 			throw new CakeException('StripeSource: Missing api key');
 		}
-		
+
 		$this->Http = new HttpSocket();
 	}
 
 /**
  * Creates a record in Stripe
- * 
+ *
  * @param Model $model The calling model
  * @param array $fields Array of fields
  * @param array $values Array of field values
@@ -75,7 +75,7 @@ class StripeSource extends DataSource {
 
 /**
  * Reads a Stripe record
- * 
+ *
  * @param Model $model The calling model
  * @param array $queryData Query data (conditions, limit, etc)
  * @return mixed `false` on failure, data on success
@@ -103,7 +103,7 @@ class StripeSource extends DataSource {
 
 /**
  * Updates a Stripe record
- * 
+ *
  * @param Model $model The calling model
  * @param array $fields Array of fields to update
  * @param array $values Array of field values
@@ -123,7 +123,7 @@ class StripeSource extends DataSource {
 			'method' => 'POST',
 			'body' => $this->reformat($model, $data)
 		);
-		
+
 		$response = $this->request($request);
 		if ($response === false) {
 			return false;
@@ -134,7 +134,7 @@ class StripeSource extends DataSource {
 
 /**
  * Deletes a Stripe record
- * 
+ *
  * @param Model $model The calling model
  * @param integer $id Id to delete
  * @return boolean Success
@@ -157,9 +157,9 @@ class StripeSource extends DataSource {
  * Submits a request to Stripe. Requests are merged with default values, such as
  * the api host. If an error occurs, it is stored in `$lastError` and `false` is
  * returned.
- * 
+ *
  * @param array $request Request details
- * @return mixed `false` on failure, data on success 
+ * @return mixed `false` on failure, data on success
  */
 	public function request($request = array()) {
 		$this->lastError = null;
@@ -177,7 +177,7 @@ class StripeSource extends DataSource {
 		);
 		$this->request = Set::merge($this->request, $request);
 		$this->request['uri']['path'] = '/v1/'.trim($this->request['uri']['path'], '/');
-		
+
 		try {
 			$response = $this->Http->request($this->request);
 			switch ($this->Http->response['status']['code']) {
@@ -194,16 +194,16 @@ class StripeSource extends DataSource {
 					CakeLog::write('stripe', $this->lastError);
 					return false;
 				break;
-			} 
+			}
 		} catch (CakeException $e) {
 			$this->lastError = $e->message;
 			CakeLog::write('stripe', $e->message);
 		}
 	}
-	
+
 /**
  * Formats data for Stripe based on `$formatFields`
- * 
+ *
  * @param Model $model The calling model
  * @param array $data Data sent by Cake
  * @return array Stripe-formatted data
@@ -222,12 +222,12 @@ class StripeSource extends DataSource {
 		}
 		return $data;
 	}
-	
-	
-	
+
+
+
 /**
  * Unused function
- * 
+ *
  * @param Model $model
  * @param string $func
  * @return null
@@ -235,6 +235,6 @@ class StripeSource extends DataSource {
 	public function calculate($model, $func) {
 		return null;
 	}
-	
-	
+
+
 }

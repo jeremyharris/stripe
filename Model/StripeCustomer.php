@@ -1,10 +1,10 @@
 <?php
 /**
  * Stripe credit card model
- * 
+ *
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
- * 
+ *
  * @copyright Copyright 2011, Jeremy Harris
  * @link http://42pixels.com
  * @package stripe
@@ -16,11 +16,11 @@ App::uses('StripeAppModel', 'Stripe.Model');
 
 /**
  * StripeCustomer
- * 
+ *
  * @package stripe.models
  */
 class StripeCustomer extends StripeAppModel {
-	
+
 /**
  * API path
  *
@@ -30,7 +30,7 @@ class StripeCustomer extends StripeAppModel {
 
 /**
  * Credit Card schema
- * 
+ *
  * @var array
  */
 	public $_schema = array(
@@ -51,10 +51,10 @@ class StripeCustomer extends StripeAppModel {
 		'trial_end' => array('type' => 'string'),
 		'coupon' => array('type' => 'string')
 	);
-	
+
 /**
  * Validation rules
- * 
+ *
  * @var array
  */
 	public $validate = array(
@@ -111,13 +111,13 @@ class StripeCustomer extends StripeAppModel {
 			'message' => 'Please enter a valid zipcode.'
 		)
 	);
-	
+
 /**
  * Formats data for Stripe
- * 
+ *
  * Fields within a key will be moved into that key when sent to Stripe. Everything
  * else will remain intact.
- * 
+ *
  * @var array
  */
 	public $formatFields = array(
@@ -134,6 +134,6 @@ class StripeCustomer extends StripeAppModel {
 			'address_country'
 		)
 	);
-	
-	
+
+
 }

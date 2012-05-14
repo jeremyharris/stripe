@@ -1,40 +1,78 @@
 <?php
+/**
+ * Stripe Source Test
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright Copyright 2011, Jeremy Harris
+ * @link http://42pixels.com
+ * @package stripe
+ * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
+ */
 
 App::uses('StripeAppModel', 'Stripe.Model');
 App::uses('StripeCustomer', 'Stripe.Model');
 App::uses('HttpSocket', 'Network/Http');
 
+/**
+ * Test Stripe Model
+ *
+ * @package stripe
+ * @subpackage Stripe.Test.Model.Datasource
+ */
 class TestStripeModel extends StripeAppModel {
-	
+
 	public $path = '/action';
-	
+
 }
 
+/**
+ * Stripe Source Test
+ *
+ * @package stripe
+ * @subpackage Stripe.Test.Model.Datasource
+ */
 class StripeSourceTest extends CakeTestCase {
-	
+
+/**
+ * setUp
+ *
+ * @return void
+ */
 	public function setUp() {
 		parent::setUp();
 		ConnectionManager::loadDatasource(array(
 			'plugin' => 'Stripe',
 			'classname' => 'StripeSource'
 		));
-		
+
 		$this->Source = new StripeSource(array(
 			'api_key' => '123456'
 		));
 		$this->Source->Http = $this->getMock('HttpSocket', array('request'));
 		$this->Model = new TestStripeModel();
 	}
-	
+
+/**
+ * tearDown
+ *
+ * @return void
+ */
 	public function tearDown() {
 		parent::tearDown();
 		unset($this->Source);
 		unset($this->Model);
 	}
-	
+
+/**
+ * testReformat
+ *
+ * @return void
+ */
 	public function testReformat() {
 		$model = new StripeCustomer();
-		
+
 		$data = array(
 			'number' => '234',
 			'name' => 'Jeremy',
@@ -51,7 +89,7 @@ class StripeSourceTest extends CakeTestCase {
 			'email' => 'jeremy@42pixels.com'
 		);
 		$this->assertEqual($result, $expected);
-		
+
 		$model->formatFields['user'] = array('email');
 		$data = array(
 			'number' => '234',
@@ -72,12 +110,22 @@ class StripeSourceTest extends CakeTestCase {
 		);
 		$this->assertEqual($result, $expected);
 	}
-	
+
+/**
+ * testConstructWithoutKey
+ *
+ * @return void
+ */
 	public function testConstructWithoutKey() {
 		$this->setExpectedException('CakeException');
 		$source = new StripeSource();
 	}
-	
+
+/**
+ * testRequest
+ *
+ * @return void
+ */
 	public function testRequest() {
 		$this->Source->Http->response = array(
 			'status' => array(
@@ -92,7 +140,7 @@ class StripeSourceTest extends CakeTestCase {
 		$this->assertFalse($response);
 		$this->assertEqual($this->Source->lastError, 'Unexpected error.');
 		$this->assertEqual($this->Source->request['uri']['path'], '/v1/path');
-		
+
 		$this->Source->Http->response = array(
 			'status' => array(
 				'code' => '402',
@@ -105,7 +153,7 @@ class StripeSourceTest extends CakeTestCase {
 		$response = $this->Source->request();
 		$this->assertFalse($response);
 		$this->assertEqual($this->Source->lastError, 'This is an error message');
-		
+
 		$this->Source->Http->response = array(
 			'status' => array(
 				'code' => '200',
@@ -119,7 +167,12 @@ class StripeSourceTest extends CakeTestCase {
 		$this->assertNull($this->Source->lastError);
 		$this->assertEqual($response, array('id' => '123'));
 	}
-	
+
+/**
+ * testCreate
+ *
+ * @return void
+ */
 	public function testCreate() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
@@ -137,7 +190,12 @@ class StripeSourceTest extends CakeTestCase {
 			'description' => 'Jeremy Harris'
 		));
 	}
-	
+
+/**
+ * testRead
+ *
+ * @return void
+ */
 	public function testRead() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
@@ -160,7 +218,12 @@ class StripeSourceTest extends CakeTestCase {
 		$this->assertEqual($this->Source->request['method'], 'GET');
 		$this->assertEqual($this->Source->request['uri']['path'], '/v1/action/1234');
 	}
-	
+
+/**
+ * testUpdate
+ *
+ * @return void
+ */
 	public function testUpdate() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
@@ -184,7 +247,12 @@ class StripeSourceTest extends CakeTestCase {
 		$this->assertEqual($this->Source->request['method'], 'POST');
 		$this->assertEqual($this->Source->request['uri']['path'], '/v1/action/1234');
 	}
-	
+
+/**
+ * testDelete
+ *
+ * @return void
+ */
 	public function testDelete() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
@@ -198,5 +266,5 @@ class StripeSourceTest extends CakeTestCase {
 		$this->assertEqual($this->Source->request['method'], 'DELETE');
 		$this->assertEqual($this->Source->request['uri']['path'], '/v1/action/1234');
 	}
-	
+
 }

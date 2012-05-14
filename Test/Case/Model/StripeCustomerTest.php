@@ -1,12 +1,35 @@
 <?php
 /**
+ * Stripe Customer Test
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright Copyright 2011, Jeremy Harris
+ * @link http://42pixels.com
+ * @package stripe
+ * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
+ */
+
+/**
  * Test card: 4242424242424242
  */
 
 App::uses('StripeCustomer', 'Stripe.Model');
 
+/**
+ * Stripe Customer Test
+ *
+ * @package stripe
+ * @subpackage Stripe.Test.Model
+ */
 class StripeCustomerTest extends CakeTestCase {
-	
+
+/**
+ * setUp
+ *
+ * @return void
+ */
 	public function setUp() {
 		parent::setUp();
 		$this->Model = new StripeCustomer();
@@ -16,12 +39,22 @@ class StripeCustomerTest extends CakeTestCase {
 		$this->Source = $this->Model->getDataSource('stripe_test');
 		$this->Source->Http = $this->getMock('HttpSocket', array('request'));
 	}
-	
+
+/**
+ * tearDown
+ *
+ * @return void
+ */
 	public function tearDown() {
 		parent::tearDown();
 		unset($this->Model);
 	}
-	
+
+/**
+ * testFlow
+ *
+ * @return void
+ */
 	public function testFlow() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
@@ -50,7 +83,7 @@ class StripeCustomerTest extends CakeTestCase {
 		$result = $this->Model->save($expected);
 		$this->assertTrue(($result !== false));
 		$id = $this->Model->id;
-		
+
 		// retrieve
 		$result = $this->Model->read();
 		$this->assertEqual($result['StripeCustomer']['id'], $id);
@@ -64,11 +97,11 @@ class StripeCustomerTest extends CakeTestCase {
 			)
 		));
 		$this->assertTrue(($result !== false));
-		
+
 		$results = $this->Model->read();
 		$this->assertEqual($result['StripeCustomer']['description'], 'Not Jeremy Harris');
-		
+
 		$this->assertTrue($this->Model->delete($id));
 	}
-	
+
 }
