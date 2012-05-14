@@ -19,5 +19,3 @@
 class StripeAppController extends AppController {
 
 }
-
-?>

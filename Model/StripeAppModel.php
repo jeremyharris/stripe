@@ -53,5 +53,3 @@ class StripeAppModel extends AppModel {
 	}
 	
 }
-
-?>
