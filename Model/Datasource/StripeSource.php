@@ -15,7 +15,7 @@
 /**
  * Imports
  */
-App::import('Core', 'HttpSocket');
+App::uses('HttpSocket', 'Network/Http');
 
 /**
  * StripSource
@@ -42,7 +42,7 @@ class StripeSource extends DataSource {
 		parent::__construct($config);
 		
 		if (empty($config['api_key'])) {
-			throw new Exception('StripeSource: Missing api key');
+			throw new CakeException('StripeSource: Missing api key');
 		}
 		
 		$this->Http = new HttpSocket();
@@ -195,7 +195,7 @@ class StripeSource extends DataSource {
 					return false;
 				break;
 			} 
-		} catch (Exception $e) {
+		} catch (CakeException $e) {
 			$this->lastError = $e->message;
 			CakeLog::write('stripe', $e->message);
 		}

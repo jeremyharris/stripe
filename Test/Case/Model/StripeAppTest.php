@@ -1,20 +1,22 @@
 <?php
-App::import('Model', 'Stripe.StripeAppModel');
+App::uses('StripeAppModel', 'Stripe.Model');
 
-class TestStripeAppModel extends CakeTestCase {
+class StripeAppTest extends CakeTestCase {
 	
-	function startTest() {
+	public function setUp() {
+		parent::setUp();
 		$this->Model = new StripeAppModel();
 		$this->Model->setDataSource('stripe_test');
 		$sources = ConnectionManager::enumConnectionObjects();
 		$this->skipIf(!in_array('stripe_test', array_keys($sources)), '`stripe_test` db config not found');
 	}
 	
-	function endTest() {
+	public function tearDown() {
+		parent::tearDown();
 		unset($this->Model);
 	}
 	
-	function testGetStripeError() {
+	public function testGetStripeError() {
 		$ds = ConnectionManager::getDataSource('stripe_test');
 		$ds->lastError = 'Some error! Ack something broke!';
 		

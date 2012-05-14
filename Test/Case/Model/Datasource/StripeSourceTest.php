@@ -1,9 +1,8 @@
 <?php
 
-App::import('Model', array('Stripe.App', 'Stripe.StripeCustomer'));
-App::import('Core', 'HttpSocket');
-
-Mock::generatePartial('HttpSocket', 'MockHttpSocket', array('request'));
+App::uses('StripeAppModel', 'Stripe.Model');
+App::uses('StripeCustomer', 'Stripe.Model');
+App::uses('HttpSocket', 'Network/Http');
 
 class TestStripeModel extends StripeAppModel {
 	
@@ -11,9 +10,10 @@ class TestStripeModel extends StripeAppModel {
 	
 }
 
-class TestStripeSource extends CakeTestCase {
+class StripeSourceTest extends CakeTestCase {
 	
-	function startTest() {
+	public function setUp() {
+		parent::setUp();
 		ConnectionManager::loadDatasource(array(
 			'plugin' => 'Stripe',
 			'classname' => 'StripeSource'
@@ -22,16 +22,17 @@ class TestStripeSource extends CakeTestCase {
 		$this->Source = new StripeSource(array(
 			'api_key' => '123456'
 		));
-		$this->Source->Http = new MockHttpSocket();
+		$this->Source->Http = $this->getMock('HttpSocket', array('request'));
 		$this->Model = new TestStripeModel();
 	}
 	
-	function endTest() {
+	public function tearDown() {
+		parent::tearDown();
 		unset($this->Source);
 		unset($this->Model);
 	}
 	
-	function testReformat() {
+	public function testReformat() {
 		$model = new StripeCustomer();
 		
 		$data = array(
@@ -72,19 +73,21 @@ class TestStripeSource extends CakeTestCase {
 		$this->assertEqual($result, $expected);
 	}
 	
-	function testConstructWithoutKey() {
-		$this->expectException();
+	public function testConstructWithoutKey() {
+		$this->setExpectedException('CakeException');
 		$source = new StripeSource();
 	}
 	
-	function testRequest() {
+	public function testRequest() {
 		$this->Source->Http->response = array(
 			'status' => array(
 				'code' => '404',
 			),
 			'body' => '{}'
 		);
-		$this->Source->Http->setReturnValueAt(0, 'request', $this->Source->Http->response['body']);
+		$this->Source->Http->expects($this->at(0))
+			->method('request')
+			->will($this->returnValue($this->Source->Http->response['body']));
 		$response = $this->Source->request(array('uri' => array('path' => '/path/')));
 		$this->assertFalse($response);
 		$this->assertEqual($this->Source->lastError, 'Unexpected error.');
@@ -96,7 +99,9 @@ class TestStripeSource extends CakeTestCase {
 			),
 			'body' => '{"error":{ "message" : "This is an error message"}}'
 		);
-		$this->Source->Http->setReturnValueAt(1, 'request', $this->Source->Http->response['body']);
+		$this->Source->Http->expects($this->at(0))
+			->method('request')
+			->will($this->returnValue($this->Source->Http->response['body']));
 		$response = $this->Source->request();
 		$this->assertFalse($response);
 		$this->assertEqual($this->Source->lastError, 'This is an error message');
@@ -107,18 +112,22 @@ class TestStripeSource extends CakeTestCase {
 			),
 			'body' => '{"id" : "123"}'
 		);
-		$this->Source->Http->setReturnValueAt(2, 'request', $this->Source->Http->response['body']);
+		$this->Source->Http->expects($this->at(0))
+			->method('request')
+			->will($this->returnValue($this->Source->Http->response['body']));
 		$response = $this->Source->request();
 		$this->assertNull($this->Source->lastError);
 		$this->assertEqual($response, array('id' => '123'));
 	}
 	
-	function testCreate() {
+	public function testCreate() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
 			'body' => '{"object" : "customer", "id" : "1234"}'
 		);
-		$this->Source->Http->setReturnValueAt(0, 'request', $this->Source->Http->response['body']);
+		$this->Source->Http->expects($this->at(0))
+			->method('request')
+			->will($this->returnValue($this->Source->Http->response['body']));
 		$response = $this->Source->create($this->Model, array('email', 'description'), array('jeremy@42pixels.com', 'Jeremy Harris'));
 		$this->assertTrue($response);
 		$this->assertEqual($this->Source->request['method'], 'POST');
@@ -129,12 +138,14 @@ class TestStripeSource extends CakeTestCase {
 		));
 	}
 	
-	function testRead() {
+	public function testRead() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
 			'body' => '{"object" : "customer", "id" : "1234", "description" : "Jeremy Harris"}'
 		);
-		$this->Source->Http->setReturnValueAt(0, 'request', $this->Source->Http->response['body']);
+		$this->Source->Http->expects($this->at(0))
+			->method('request')
+			->will($this->returnValue($this->Source->Http->response['body']));
 		$response = $this->Source->read($this->Model, array('conditions' => array('TestStripeModel.id' => '1234')));
 		$this->assertEqual($response, array(
 			array(
@@ -150,14 +161,21 @@ class TestStripeSource extends CakeTestCase {
 		$this->assertEqual($this->Source->request['uri']['path'], '/v1/action/1234');
 	}
 	
-	function testUpdate() {
+	public function testUpdate() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
 			'body' => '{"object" : "customer", "id" : "1234"}'
 		);
-		$this->Source->Http->setReturnValueAt(0, 'request', $this->Source->Http->response['body']);
+		$this->Source->Http->expects($this->at(0))
+			->method('request')
+			->will($this->returnValue($this->Source->Http->response['body']));
 		$response = $this->Source->update($this->Model, array('email', 'description', 'id'), array('jeremy@42pixels.com', 'Jeremy Harris', '1234'));
-		$this->assertTrue($response);
+		$this->assertEquals(array(
+			'TestStripeModel' => array(
+				'object' => 'customer',
+				'id' => '1234',
+			),
+		), $response);
 		$this->assertEqual($this->Model->id, 1234);
 		$this->assertEqual($this->Source->request['body'], array(
 			'email' => 'jeremy@42pixels.com',
@@ -167,12 +185,14 @@ class TestStripeSource extends CakeTestCase {
 		$this->assertEqual($this->Source->request['uri']['path'], '/v1/action/1234');
 	}
 	
-	function testDelete() {
+	public function testDelete() {
 		$this->Source->Http->response = array(
 			'status' => array('code' => 200),
 			'body' => '{"deleted" : "true", "id" : "1234"}'
 		);
-		$this->Source->Http->setReturnValueAt(0, 'request', $this->Source->Http->response['body']);
+		$this->Source->Http->expects($this->at(0))
+			->method('request')
+			->will($this->returnValue($this->Source->Http->response['body']));
 		$response = $this->Source->delete($this->Model, array('TestStripeModel.id' => '1234'));
 		$this->assertTrue($response);
 		$this->assertEqual($this->Source->request['method'], 'DELETE');
