@@ -34,6 +34,20 @@ class StripeSource extends DataSource {
 	public $Http = null;
 
 /**
+ * Start quote
+ * 
+ * @var string 
+ */
+	public $startQuote = '';
+
+/**
+ * End quote
+ * 
+ * @var string 
+ */
+	public $endQuote = '';
+
+/**
  * Constructor. Sets API key and throws an error if it's not defined in the
  * db config
  *
@@ -45,7 +59,7 @@ class StripeSource extends DataSource {
 		if (empty($config['api_key'])) {
 			throw new CakeException('StripeSource: Missing api key');
 		}
-
+		
 		$this->Http = new HttpSocket();
 	}
 
