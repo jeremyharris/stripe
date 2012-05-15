@@ -16,6 +16,7 @@
  * Imports
  */
 App::uses('HttpSocket', 'Network/Http');
+App::uses('CakeLog', 'Log');
 
 /**
  * StripSource
