@@ -52,8 +52,8 @@ class StripePlanTest extends CakeTestCase {
  * @return void
  */
 	public function testValidation() {
-		$result = $this->Model->save(array('StripePlan' => array()));
-		$this->assertFalse($result);
+		$this->Model->set(array('StripePlan' => array()));
+		$this->assertFalse($this->Model->validates());
 
 		$this->assertTrue(array_key_exists('id', $this->Model->validationErrors));
 		$this->assertTrue(array_key_exists('amount', $this->Model->validationErrors));

@@ -78,7 +78,7 @@ class StripeCustomerTest extends CakeTestCase {
 						'card' => array(
 							'number' => '4242424242424242',
 							'exp_month' => '11',
-							'exp_year' => '2013',
+							'exp_year' => date('Y', strtotime('next year')),
 							'cvc' => '123',
 						),
 					),
