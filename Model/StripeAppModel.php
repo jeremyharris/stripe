@@ -40,7 +40,7 @@ class StripeAppModel extends AppModel {
  * @return string Error
  */
 	public function getStripeError() {
-		$ds = ConnectionManager::getDataSource($this->useDbConfig);
+		$ds = $this->getDataSource();
 		return $ds->lastError;
 	}
 
