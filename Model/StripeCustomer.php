@@ -35,6 +35,7 @@ class StripeCustomer extends StripeAppModel {
  */
 	public $_schema = array(
 		'id' => array('type' => 'integer', 'length' => '12'),
+		'card' => array('type' => 'string'),
 		'number' => array('type' => 'string'),
 		'exp_month' => array('type' => 'string', 'length' => '2'),
 		'exp_year' => array('type' => 'string', 'length' => '4'),
