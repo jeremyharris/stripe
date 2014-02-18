@@ -35,15 +35,15 @@ class StripeSource extends DataSource {
 
 /**
  * Start quote
- * 
- * @var string 
+ *
+ * @var string
  */
 	public $startQuote = '';
 
 /**
  * End quote
- * 
- * @var string 
+ *
+ * @var string
  */
 	public $endQuote = '';
 
@@ -59,7 +59,7 @@ class StripeSource extends DataSource {
 		if (empty($config['api_key'])) {
 			throw new CakeException('StripeSource: Missing api key');
 		}
-		
+
 		$this->Http = new HttpSocket();
 	}
 
@@ -71,7 +71,7 @@ class StripeSource extends DataSource {
  * @param array $values Array of field values
  * @return boolean Success
  */
-	public function create($model, $fields = array(), $values = array()) {
+	public function create(Model $model, $fields = array(), $values = array()) {
 		$request = array(
 			'uri' => array(
 				'path' => $model->path
@@ -93,9 +93,10 @@ class StripeSource extends DataSource {
  *
  * @param Model $model The calling model
  * @param array $queryData Query data (conditions, limit, etc)
+ * @param int $recursive Recursive
  * @return mixed `false` on failure, data on success
  */
-	public function read($model, $queryData = array()) {
+	public function read(Model $model, $queryData = array(), $recursive = null) {
 		// If calculate() wants to know if the record exists. Say yes.
 		if ($queryData['fields'] == 'COUNT') {
 			return array(array(array('count' => 1)));
@@ -126,9 +127,10 @@ class StripeSource extends DataSource {
  * @param Model $model The calling model
  * @param array $fields Array of fields to update
  * @param array $values Array of field values
+ * @param array $conditions Array of conditions
  * @return mixed `false` on failure, data on success
  */
-	public function update($model, $fields = array(), $values = array()) {
+	public function update(Model $model, $fields = array(), $values = array(), $conditions = array()) {
 		$data = array_combine($fields, $values);
 		if (!isset($data['id'])) {
 			$data['id'] = $model->id;
@@ -155,13 +157,13 @@ class StripeSource extends DataSource {
  * Deletes a Stripe record
  *
  * @param Model $model The calling model
- * @param integer $id Id to delete
+ * @param array $conditions Conditions
  * @return boolean Success
  */
-	public function delete($model, $id = null) {
+	public function delete(Model $model, $conditions = array()) {
 		$request = array(
 			'uri' => array(
-				'path' => trim($model->path, '/').'/'.$id[$model->alias.'.'.$model->primaryKey]
+				'path' => trim($model->path, '/').'/'.$conditions[$model->alias.'.'.$model->primaryKey]
 			),
 			'method' => 'DELETE'
 		);
@@ -260,7 +262,7 @@ class StripeSource extends DataSource {
  *
  * @return null
  */
-	public function listSources() {
+	public function listSources($data = null) {
 		return null;
 	}
 
@@ -270,7 +272,7 @@ class StripeSource extends DataSource {
  * @param Model $Model
  * @return array
  */
-	public function describe(Model $Model) {
+	public function describe($Model) {
 		if (isset($Model->_schema)) {
 			return $Model->_schema;
 		} else {

@@ -118,7 +118,7 @@ class StripePlan extends StripeAppModel {
  *
  * @return boolean True
  */
-	public function beforeSave() {
+	public function beforeSave($options = array()) {
 		$this->id = null;
 		return true;
 	}
