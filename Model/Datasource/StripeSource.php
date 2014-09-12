@@ -48,6 +48,13 @@ class StripeSource extends DataSource {
 	public $endQuote = '';
 
 /**
+ * Holds last Stripe error
+ *
+ * @var string
+ */
+	public $lastError = null;
+
+/**
  * Constructor. Sets API key and throws an error if it's not defined in the
  * db config
  *
